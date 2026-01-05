@@ -1,0 +1,1246 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Chess Adventure - Learn to Play Chess!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .board-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 70px);
+            grid-template-rows: repeat(8, 70px);
+            border: 5px solid #8B4513;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .square {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .square.light {
+            background-color: #f0d9b5;
+        }
+
+        .square.dark {
+            background-color: #b58863;
+        }
+
+        .square.selected {
+            background-color: #7fc97f !important;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+        }
+
+        .square.legal-move {
+            background-color: #90EE90 !important;
+        }
+
+        .square.legal-move::after {
+            content: '●';
+            position: absolute;
+            color: rgba(0,0,0,0.4);
+            font-size: 24px;
+        }
+
+        .square.target-square {
+            background-color: #FFD700 !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .square:active {
+            transform: scale(0.95);
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 320px;
+            max-width: 450px;
+            flex: 1;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #e0e0e0;
+            min-height: 50px;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .level-info {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .level-info h3 {
+            margin-bottom: 8px;
+            font-size: 1.3em;
+        }
+
+        .instruction-box {
+            background: #f9f9f9;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .instruction-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .piece-selector {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .piece-selector h4 {
+            margin-bottom: 12px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .piece-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .piece-btn {
+            padding: 15px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            font-size: 36px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .piece-btn span:last-child {
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .piece-btn.selected-piece {
+            border-color: #667eea;
+            background: #e8eaf6;
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .piece-btn:active {
+            transform: scale(0.95);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+            min-height: 50px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .piece-legend {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .piece-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .piece-item span:first-child {
+            font-size: 28px;
+        }
+
+        .hint-box {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #17a2b8;
+        }
+
+        .turn-indicator {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .ai-thinking {
+            text-align: center;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        .setup-helper {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .setup-helper h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .setup-helper p {
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .chessboard {
+                grid-template-columns: repeat(8, 60px);
+                grid-template-rows: repeat(8, 60px);
+            }
+            
+            .square {
+                width: 60px;
+                height: 60px;
+                font-size: 42px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>♔ Chess Adventure ♚</h1>
+        
+        <div class="game-container">
+            <div class="board-section">
+                <div id="chessboard" class="chessboard"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="setMode('learn')">📚 Learn</button>
+                    <button class="mode-btn" onclick="setMode('practice')">🤖 Practice</button>
+                    <button class="mode-btn" onclick="setMode('multiplayer')">👥 2-Player</button>
+                </div>
+
+                <div id="level-info" class="level-info">
+                    <h3>Level 1: Board Setup</h3>
+                    <p>Learn how to set up the chess board!</p>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%">0%</div>
+                </div>
+
+                <div id="status-message"></div>
+                <div id="ai-thinking" style="display: none;"></div>
+                <div id="turn-indicator" class="turn-indicator"></div>
+                
+                <div id="setup-helper" style="display: none;"></div>
+                <div id="piece-selector" style="display: none;"></div>
+                <div id="instruction-box" class="instruction-box"></div>
+                <div id="hint-box" style="display: none;"></div>
+
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="undoMove()" id="undo-btn">↶ Undo</button>
+                    <button class="btn btn-secondary" onclick="getHint()" id="hint-btn">💡 Hint</button>
+                    <button class="btn btn-primary" onclick="resetBoard()" id="reset-btn">🔄 Reset</button>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-success" onclick="checkSetup()" id="check-setup-btn" style="display: none;">✓ Check My Setup</button>
+                    <button class="btn btn-primary" onclick="nextLevel()" id="next-btn" style="display: none;">Next Level →</button>
+                </div>
+
+                <div id="piece-legend" class="piece-legend"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chess pieces Unicode
+        const pieces = {
+            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+        };
+
+        const pieceNames = {
+            'K': 'King', 'Q': 'Queen', 'R': 'Rook', 'B': 'Bishop', 'N': 'Knight', 'P': 'Pawn'
+        };
+
+        // Game state
+        let gameState = {
+            mode: 'learn',
+            currentLevel: 1,
+            board: Array(8).fill(null).map(() => Array(8).fill(null)),
+            selectedSquare: null,
+            currentTurn: 'white',
+            moveHistory: [],
+            completedLevels: [false, false, false, false, false, false, false, false],
+            selectedPieceType: null,
+            setupMode: false
+        };
+
+        // Level definitions
+        const levels = [
+            {
+                id: 1,
+                name: "Board Setup",
+                description: "Learn how to set up the chess board correctly!",
+                type: "setup",
+                instructions: "Click on a piece type below, then click on the board to place it. Set up all the pieces correctly!",
+                targetBoard: getInitialBoard()
+            },
+            {
+                id: 2,
+                name: "The Rook",
+                description: "Learn how the Rook moves!",
+                type: "movement",
+                piece: 'R',
+                instructions: "The Rook moves in straight lines - horizontally or vertically, any number of squares. Move the white Rook to capture the black pawn!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[4][0] = 'R';
+                    board[4][7] = 'p';
+                    return board;
+                }
+            },
+            {
+                id: 3,
+                name: "The Bishop",
+                description: "Learn how the Bishop moves!",
+                type: "movement",
+                piece: 'B',
+                instructions: "The Bishop moves diagonally, any number of squares. Move the white Bishop to capture the black pawn!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[3][0] = 'B';
+                    board[6][3] = 'p';
+                    return board;
+                }
+            },
+            {
+                id: 4,
+                name: "The Queen",
+                description: "Learn how the Queen moves!",
+                type: "movement",
+                piece: 'Q',
+                instructions: "The Queen is the most powerful piece! She moves like a Rook AND a Bishop - horizontally, vertically, or diagonally. Capture the black pawn!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[3][3] = 'Q';
+                    board[3][7] = 'p';
+                    return board;
+                }
+            },
+            {
+                id: 5,
+                name: "The Knight",
+                description: "Learn how the Knight moves!",
+                type: "movement",
+                piece: 'N',
+                instructions: "The Knight moves in an 'L' shape - 2 squares in one direction, then 1 square perpendicular. It can jump over other pieces! Capture the black pawn!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[3][3] = 'N';
+                    board[5][4] = 'p';
+                    board[4][4] = 'P';
+                    return board;
+                }
+            },
+            {
+                id: 6,
+                name: "The Pawn",
+                description: "Learn how the Pawn moves!",
+                type: "movement",
+                piece: 'P',
+                instructions: "Pawns move forward one square (or two on their first move). They capture diagonally forward. Move your pawn to capture the black pawn!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[1][3] = 'P';
+                    board[2][4] = 'p';
+                    return board;
+                }
+            },
+            {
+                id: 7,
+                name: "The King",
+                description: "Learn how the King moves and about Check!",
+                type: "movement",
+                piece: 'K',
+                instructions: "The King moves one square in any direction. The King is the most important piece - if your King is in checkmate, you lose! Move your King to safety!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[0][4] = 'K';
+                    board[2][4] = 'r';
+                    return board;
+                }
+            },
+            {
+                id: 8,
+                name: "Basic Checkmate",
+                description: "Learn how to checkmate!",
+                type: "puzzle",
+                instructions: "Checkmate means the King is in check and cannot escape. Use your Queen to checkmate the black King!",
+                setupBoard: () => {
+                    let board = Array(8).fill(null).map(() => Array(8).fill(null));
+                    board[0][0] = 'K';
+                    board[7][4] = 'k';
+                    board[5][0] = 'Q';
+                    return board;
+                }
+            }
+        ];
+
+        function getInitialBoard() {
+            return [
+                ['R','N','B','Q','K','B','N','R'],
+                ['P','P','P','P','P','P','P','P'],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                ['p','p','p','p','p','p','p','p'],
+                ['r','n','b','q','k','b','n','r']
+            ];
+        }
+
+        function initBoard() {
+            const board = document.getElementById('chessboard');
+            board.innerHTML = '';
+            
+            for (let row = 7; row >= 0; row--) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.onclick = () => handleSquareClick(row, col);
+                    
+                    const piece = gameState.board[row][col];
+                    if (piece) {
+                        square.textContent = pieces[piece];
+                    }
+                    
+                    board.appendChild(square);
+                }
+            }
+            
+            updateTurnIndicator();
+        }
+
+        function handleSquareClick(row, col) {
+            if (gameState.setupMode) {
+                handleSetupClick(row, col);
+                return;
+            }
+
+            const piece = gameState.board[row][col];
+            
+            if (gameState.selectedSquare) {
+                const [selectedRow, selectedCol] = gameState.selectedSquare;
+                
+                if (isLegalMove(selectedRow, selectedCol, row, col)) {
+                    makeMove(selectedRow, selectedCol, row, col);
+                    gameState.selectedSquare = null;
+                    clearHighlights();
+                    
+                    if (gameState.mode === 'practice' && gameState.currentTurn === 'black') {
+                        setTimeout(makeAIMove, 500);
+                    }
+                } else if (piece && isPlayerPiece(piece)) {
+                    selectSquare(row, col);
+                } else {
+                    gameState.selectedSquare = null;
+                    clearHighlights();
+                }
+            } else if (piece && isPlayerPiece(piece)) {
+                selectSquare(row, col);
+            }
+        }
+
+        function handleSetupClick(row, col) {
+            if (!gameState.selectedPieceType) {
+                showStatusMessage('Please select a piece type first!', 'info');
+                return;
+            }
+
+            gameState.board[row][col] = gameState.selectedPieceType;
+            initBoard();
+        }
+
+        function showPieceSelector() {
+            const selector = document.getElementById('piece-selector');
+            selector.style.display = 'block';
+            
+            selector.innerHTML = `
+                <h4>👆 Select a Piece to Place</h4>
+                <div class="piece-buttons">
+                    <button class="piece-btn" onclick="selectPieceType('R')">
+                        <span>${pieces['R']}</span>
+                        <span>Rook</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('N')">
+                        <span>${pieces['N']}</span>
+                        <span>Knight</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('B')">
+                        <span>${pieces['B']}</span>
+                        <span>Bishop</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('Q')">
+                        <span>${pieces['Q']}</span>
+                        <span>Queen</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('K')">
+                        <span>${pieces['K']}</span>
+                        <span>King</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('P')">
+                        <span>${pieces['P']}</span>
+                        <span>Pawn</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('r')">
+                        <span>${pieces['r']}</span>
+                        <span>Rook</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('n')">
+                        <span>${pieces['n']}</span>
+                        <span>Knight</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('b')">
+                        <span>${pieces['b']}</span>
+                        <span>Bishop</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('q')">
+                        <span>${pieces['q']}</span>
+                        <span>Queen</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('k')">
+                        <span>${pieces['k']}</span>
+                        <span>King</span>
+                    </button>
+                    <button class="piece-btn" onclick="selectPieceType('p')">
+                        <span>${pieces['p']}</span>
+                        <span>Pawn</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectPieceType(pieceType) {
+            gameState.selectedPieceType = pieceType;
+            
+            document.querySelectorAll('.piece-btn').forEach(btn => {
+                btn.classList.remove('selected-piece');
+            });
+            
+            event.target.closest('.piece-btn').classList.add('selected-piece');
+            
+            showStatusMessage(`Selected: ${pieceNames[pieceType.toUpperCase()]} - Now click on the board to place it!`, 'info');
+        }
+
+        function showSetupHelper() {
+            const helper = document.getElementById('setup-helper');
+            helper.style.display = 'block';
+            helper.innerHTML = `
+                <h4>🎯 How to Set Up the Board</h4>
+                <p><strong>Step 1:</strong> Click on a piece below (white or black)<br>
+                <strong>Step 2:</strong> Click on the board where you want to place it<br>
+                <strong>Step 3:</strong> Repeat until all pieces are placed<br>
+                <strong>Step 4:</strong> Click "Check My Setup" to see if it's correct!</p>
+            `;
+        }
+
+        function checkSetup() {
+            const targetBoard = levels[0].targetBoard;
+            let correct = true;
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (gameState.board[row][col] !== targetBoard[row][col]) {
+                        correct = false;
+                        break;
+                    }
+                }
+                if (!correct) break;
+            }
+            
+            if (correct) {
+                completeLevel();
+                gameState.setupMode = false;
+                document.getElementById('piece-selector').style.display = 'none';
+                document.getElementById('setup-helper').style.display = 'none';
+                document.getElementById('check-setup-btn').style.display = 'none';
+            } else {
+                showStatusMessage('Not quite right! Check the piece positions. Use the hint button for help!', 'error');
+            }
+        }
+
+        function isPlayerPiece(piece) {
+            if (gameState.mode === 'multiplayer') return true;
+            if (gameState.mode === 'practice') {
+                return gameState.currentTurn === 'white' && piece === piece.toUpperCase();
+            }
+            return piece === piece.toUpperCase();
+        }
+
+        function selectSquare(row, col) {
+            gameState.selectedSquare = [row, col];
+            clearHighlights();
+            
+            const squares = document.querySelectorAll('.square');
+            squares.forEach(sq => {
+                const r = parseInt(sq.dataset.row);
+                const c = parseInt(sq.dataset.col);
+                if (r === row && c === col) {
+                    sq.classList.add('selected');
+                } else if (isLegalMove(row, col, r, c)) {
+                    sq.classList.add('legal-move');
+                }
+            });
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(sq => {
+                sq.classList.remove('selected', 'legal-move', 'target-square');
+            });
+        }
+
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = gameState.board[fromRow][fromCol];
+            const capturedPiece = gameState.board[toRow][toCol];
+            
+            gameState.moveHistory.push({
+                from: [fromRow, fromCol],
+                to: [toRow, toCol],
+                piece: piece,
+                captured: capturedPiece
+            });
+            
+            gameState.board[toRow][toCol] = piece;
+            gameState.board[fromRow][fromCol] = null;
+            
+            if ((piece === 'P' && toRow === 7) || (piece === 'p' && toRow === 0)) {
+                gameState.board[toRow][toCol] = piece === 'P' ? 'Q' : 'q';
+            }
+            
+            gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
+            initBoard();
+            checkLevelCompletion();
+        }
+
+        function undoMove() {
+            if (gameState.moveHistory.length === 0) return;
+            
+            const lastMove = gameState.moveHistory.pop();
+            gameState.board[lastMove.from[0]][lastMove.from[1]] = lastMove.piece;
+            gameState.board[lastMove.to[0]][lastMove.to[1]] = lastMove.captured;
+            gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
+            
+            initBoard();
+        }
+
+        function isLegalMove(fromRow, fromCol, toRow, toCol) {
+            const piece = gameState.board[fromRow][fromCol];
+            if (!piece) return false;
+            
+            const targetPiece = gameState.board[toRow][toCol];
+            if (targetPiece && (piece.toUpperCase() === piece) === (targetPiece.toUpperCase() === targetPiece)) {
+                return false;
+            }
+            
+            const pieceType = piece.toUpperCase();
+            
+            switch(pieceType) {
+                case 'P':
+                    return isLegalPawnMove(fromRow, fromCol, toRow, toCol, piece);
+                case 'R':
+                    return isLegalRookMove(fromRow, fromCol, toRow, toCol);
+                case 'N':
+                    return isLegalKnightMove(fromRow, fromCol, toRow, toCol);
+                case 'B':
+                    return isLegalBishopMove(fromRow, fromCol, toRow, toCol);
+                case 'Q':
+                    return isLegalQueenMove(fromRow, fromCol, toRow, toCol);
+                case 'K':
+                    return isLegalKingMove(fromRow, fromCol, toRow, toCol);
+            }
+            
+            return false;
+        }
+
+        function isLegalPawnMove(fromRow, fromCol, toRow, toCol, piece) {
+            const direction = piece === piece.toUpperCase() ? 1 : -1;
+            const startRow = piece === piece.toUpperCase() ? 1 : 6;
+            
+            if (fromCol === toCol && !gameState.board[toRow][toCol]) {
+                if (toRow === fromRow + direction) return true;
+                if (fromRow === startRow && toRow === fromRow + 2 * direction && !gameState.board[fromRow + direction][fromCol]) {
+                    return true;
+                }
+            }
+            
+            if (Math.abs(toCol - fromCol) === 1 && toRow === fromRow + direction && gameState.board[toRow][toCol]) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function isLegalRookMove(fromRow, fromCol, toRow, toCol) {
+            if (fromRow !== toRow && fromCol !== toCol) return false;
+            return !isPathBlocked(fromRow, fromCol, toRow, toCol);
+        }
+
+        function isLegalBishopMove(fromRow, fromCol, toRow, toCol) {
+            if (Math.abs(fromRow - toRow) !== Math.abs(fromCol - toCol)) return false;
+            return !isPathBlocked(fromRow, fromCol, toRow, toCol);
+        }
+
+        function isLegalQueenMove(fromRow, fromCol, toRow, toCol) {
+            return isLegalRookMove(fromRow, fromCol, toRow, toCol) || 
+                   isLegalBishopMove(fromRow, fromCol, toRow, toCol);
+        }
+
+        function isLegalKnightMove(fromRow, fromCol, toRow, toCol) {
+            const rowDiff = Math.abs(fromRow - toRow);
+            const colDiff = Math.abs(fromCol - toCol);
+            return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+        }
+
+        function isLegalKingMove(fromRow, fromCol, toRow, toCol) {
+            return Math.abs(fromRow - toRow) <= 1 && Math.abs(fromCol - toCol) <= 1;
+        }
+
+        function isPathBlocked(fromRow, fromCol, toRow, toCol) {
+            const rowStep = toRow > fromRow ? 1 : toRow < fromRow ? -1 : 0;
+            const colStep = toCol > fromCol ? 1 : toCol < fromCol ? -1 : 0;
+            
+            let currentRow = fromRow + rowStep;
+            let currentCol = fromCol + colStep;
+            
+            while (currentRow !== toRow || currentCol !== toCol) {
+                if (gameState.board[currentRow][currentCol]) return true;
+                currentRow += rowStep;
+                currentCol += colStep;
+            }
+            
+            return false;
+        }
+
+        function makeAIMove() {
+            showAIThinking(true);
+            
+            setTimeout(() => {
+                const blackPieces = [];
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = gameState.board[row][col];
+                        if (piece && piece === piece.toLowerCase()) {
+                            blackPieces.push([row, col]);
+                        }
+                    }
+                }
+                
+                let moveMade = false;
+                for (let attempt = 0; attempt < 100 && !moveMade; attempt++) {
+                    const [fromRow, fromCol] = blackPieces[Math.floor(Math.random() * blackPieces.length)];
+                    const toRow = Math.floor(Math.random() * 8);
+                    const toCol = Math.floor(Math.random() * 8);
+                    
+                    if (isLegalMove(fromRow, fromCol, toRow, toCol)) {
+                        makeMove(fromRow, fromCol, toRow, toCol);
+                        moveMade = true;
+                    }
+                }
+                
+                showAIThinking(false);
+            }, 1000);
+        }
+
+        function showAIThinking(show) {
+            const aiThinking = document.getElementById('ai-thinking');
+            if (show) {
+                aiThinking.innerHTML = '<div class="ai-thinking"><div class="spinner"></div> AI is thinking...</div>';
+                aiThinking.style.display = 'block';
+            } else {
+                aiThinking.style.display = 'none';
+            }
+        }
+
+        function getHint() {
+            const hintBox = document.getElementById('hint-box');
+            const level = levels[gameState.currentLevel - 1];
+            
+            let hint = "Try moving different pieces to see what moves are legal!";
+            
+            if (level.type === 'movement') {
+                hint = `Remember: The ${pieceNames[level.piece]} ${getMovementHint(level.piece)}`;
+            } else if (level.type === 'setup') {
+                hint = "White pieces (bottom): Row 1 - Rook, Knight, Bishop, Queen (on her color!), King, Bishop, Knight, Rook. Row 2 - All Pawns. Black pieces mirror white on top!";
+            }
+            
+            hintBox.innerHTML = `<div class="hint-box"><strong>💡 Hint:</strong> ${hint}</div>`;
+            hintBox.style.display = 'block';
+            
+            setTimeout(() => {
+                hintBox.style.display = 'none';
+            }, 8000);
+        }
+
+        function getMovementHint(piece) {
+            const hints = {
+                'R': 'moves in straight lines (horizontal or vertical).',
+                'B': 'moves diagonally.',
+                'Q': 'moves like a Rook AND a Bishop!',
+                'N': 'moves in an L-shape and can jump over pieces.',
+                'K': 'moves one square in any direction.',
+                'P': 'moves forward but captures diagonally.'
+            };
+            return hints[piece] || '';
+        }
+
+        function checkLevelCompletion() {
+            const level = levels[gameState.currentLevel - 1];
+            
+            if (level.type === 'movement') {
+                let blackPawnsRemaining = 0;
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if (gameState.board[row][col] === 'p') {
+                            blackPawnsRemaining++;
+                        }
+                    }
+                }
+                
+                if (blackPawnsRemaining === 0) {
+                    completeLevel();
+                }
+            } else if (level.type === 'puzzle') {
+                if (isCheckmate('black')) {
+                    completeLevel();
+                }
+            }
+        }
+
+        function isCheckmate(color) {
+            const kingChar = color === 'white' ? 'K' : 'k';
+            let kingPos = null;
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (gameState.board[row][col] === kingChar) {
+                        kingPos = [row, col];
+                        break;
+                    }
+                }
+                if (kingPos) break;
+            }
+            
+            if (!kingPos) return false;
+            
+            return isSquareUnderAttack(kingPos[0], kingPos[1], color);
+        }
+
+        function isSquareUnderAttack(row, col, defendingColor) {
+            const attackingColor = defendingColor === 'white' ? 'black' : 'white';
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = gameState.board[r][c];
+                    if (piece) {
+                        const isAttacker = (attackingColor === 'white') === (piece === piece.toUpperCase());
+                        if (isAttacker && isLegalMove(r, c, row, col)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        function completeLevel() {
+            gameState.completedLevels[gameState.currentLevel - 1] = true;
+            showStatusMessage('🎉 Level Complete! Great job!', 'success');
+            document.getElementById('next-btn').style.display = 'block';
+            updateProgress();
+        }
+
+        function nextLevel() {
+            if (gameState.currentLevel < levels.length) {
+                gameState.currentLevel++;
+                loadLevel(gameState.currentLevel);
+            } else {
+                showStatusMessage('🏆 Congratulations! You\'ve completed all levels!', 'success');
+            }
+        }
+
+        function loadLevel(levelNum) {
+            const level = levels[levelNum - 1];
+            gameState.currentLevel = levelNum;
+            gameState.moveHistory = [];
+            gameState.currentTurn = 'white';
+            gameState.selectedPieceType = null;
+            document.getElementById('next-btn').style.display = 'none';
+            
+            if (level.type === 'setup') {
+                gameState.board = Array(8).fill(null).map(() => Array(8).fill(null));
+                gameState.setupMode = true;
+                showPieceSelector();
+                showSetupHelper();
+                document.getElementById('check-setup-btn').style.display = 'block';
+            } else {
+                gameState.setupMode = false;
+                document.getElementById('piece-selector').style.display = 'none';
+                document.getElementById('setup-helper').style.display = 'none';
+                document.getElementById('check-setup-btn').style.display = 'none';
+                
+                if (level.setupBoard) {
+                    gameState.board = level.setupBoard();
+                } else {
+                    gameState.board = getInitialBoard();
+                }
+            }
+            
+            updateLevelInfo(level);
+            updateInstructions(level.instructions);
+            initBoard();
+            updateProgress();
+        }
+
+        function updateLevelInfo(level) {
+            const levelInfo = document.getElementById('level-info');
+            levelInfo.innerHTML = `
+                <h3>Level ${level.id}: ${level.name}</h3>
+                <p>${level.description}</p>
+            `;
+        }
+
+        function updateInstructions(text) {
+            const instructionBox = document.getElementById('instruction-box');
+            instructionBox.innerHTML = `
+                <h4>📖 Instructions</h4>
+                <p>${text}</p>
+            `;
+        }
+
+        function updateProgress() {
+            const completed = gameState.completedLevels.filter(l => l).length;
+            const total = levels.length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+        }
+
+        function updateTurnIndicator() {
+            const indicator = document.getElementById('turn-indicator');
+            if (gameState.mode === 'learn') {
+                if (gameState.setupMode) {
+                    indicator.textContent = '🎯 Setup Mode';
+                } else {
+                    indicator.textContent = '📚 Learning Mode';
+                }
+            } else {
+                const turn = gameState.currentTurn === 'white' ? 'White' : 'Black';
+                indicator.textContent = `${turn}'s Turn`;
+            }
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function setMode(mode) {
+            gameState.mode = mode;
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (mode === 'learn') {
+                loadLevel(1);
+            } else if (mode === 'practice') {
+                gameState.setupMode = false;
+                document.getElementById('piece-selector').style.display = 'none';
+                document.getElementById('setup-helper').style.display = 'none';
+                document.getElementById('check-setup-btn').style.display = 'none';
+                gameState.board = getInitialBoard();
+                gameState.currentTurn = 'white';
+                initBoard();
+                updateInstructions('Play against the AI! Try to checkmate the black king.');
+            } else if (mode === 'multiplayer') {
+                gameState.setupMode = false;
+                document.getElementById('piece-selector').style.display = 'none';
+                document.getElementById('setup-helper').style.display = 'none';
+                document.getElementById('check-setup-btn').style.display = 'none';
+                gameState.board = getInitialBoard();
+                gameState.currentTurn = 'white';
+                initBoard();
+                updateInstructions('Two player mode! Take turns moving pieces.');
+            }
+        }
+
+        function resetBoard() {
+            gameState.moveHistory = [];
+            gameState.currentTurn = 'white';
+            gameState.selectedPieceType = null;
+            
+            if (gameState.mode === 'learn') {
+                loadLevel(gameState.currentLevel);
+            } else {
+                gameState.board = getInitialBoard();
+                initBoard();
+            }
+        }
+
+        function showPieceLegend() {
+            const legend = document.getElementById('piece-legend');
+            legend.innerHTML = '<h4 style="grid-column: 1 / -1; margin-bottom: 10px; font-size: 1.1em;">♟ Chess Pieces</h4>';
+            
+            const pieceList = [
+                ['K', 'King'], ['Q', 'Queen'], ['R', 'Rook'],
+                ['B', 'Bishop'], ['N', 'Knight'], ['P', 'Pawn']
+            ];
+            
+            pieceList.forEach(([symbol, name]) => {
+                const item = document.createElement('div');
+                item.className = 'piece-item';
+                item.innerHTML = `<span>${pieces[symbol]}</span><span><strong>${name}</strong></span>`;
+                legend.appendChild(item);
+            });
+        }
+
+        // Initialize game
+        window.onload = () => {
+            loadLevel(1);
+            showPieceLegend();
+        };
+    </script>
+</body>
+</html>
