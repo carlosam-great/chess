@@ -7,14 +7,14 @@
     <title>Chess Adventure</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 15px; color: #333; touch-action: manipulation; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; color: #333; touch-action: manipulation; overflow-x: hidden; }
         .container { max-width: 1400px; margin: 0 auto; }
         h1 { text-align: center; color: white; font-size: 2.2em; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .game-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
-        .board-section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .board-labels { display: flex; justify-content: center; margin-bottom: 10px; gap: 70px; padding-left: 35px; }
+        .board-section { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; }
+        .board-labels { display: flex; justify-content: center; margin-bottom: 10px; gap: 70px; }
         .board-labels span { width: 70px; text-align: center; font-weight: bold; color: #8B4513; }
-        .board-with-numbers { display: flex; gap: 10px; }
+        .board-with-numbers { display: flex; gap: 10px; align-items: center; justify-content: center; }
         .row-labels { display: flex; flex-direction: column-reverse; justify-content: space-around; padding: 5px 0; }
         .row-labels span { height: 70px; display: flex; align-items: center; font-weight: bold; color: #8B4513; }
         .chessboard { display: grid; grid-template-columns: repeat(8, 70px); grid-template-rows: repeat(8, 70px); border: 5px solid #8B4513; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
@@ -65,12 +65,13 @@
         .setup-helper h4 { color: #2e7d32; margin-bottom: 10px; font-size: 1.1em; }
         .setup-helper p { font-size: 15px; line-height: 1.5; }
         @media (max-width: 768px) {
-            .chessboard { grid-template-columns: repeat(8, 60px); grid-template-rows: repeat(8, 60px); }
-            .square { width: 60px; height: 60px; font-size: 42px; }
-            .board-labels { gap: 60px; }
-            .board-labels span { width: 60px; }
-            .row-labels span { height: 60px; }
+            .chessboard { grid-template-columns: repeat(8, 55px); grid-template-rows: repeat(8, 55px); }
+            .square { width: 55px; height: 55px; font-size: 38px; }
+            .board-labels { gap: 55px; }
+            .board-labels span { width: 55px; font-size: 14px; }
+            .row-labels span { height: 55px; font-size: 14px; }
             h1 { font-size: 1.8em; }
+            .board-section { padding: 10px; }
         }
     </style>
 </head>
